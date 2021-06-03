@@ -1,0 +1,12 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Tile : MonoBehaviour
+{
+    public bool can_go_up;
+    public bool can_go_down;
+    public bool can_go_left;
+    public bool can_go_right;
+
+}

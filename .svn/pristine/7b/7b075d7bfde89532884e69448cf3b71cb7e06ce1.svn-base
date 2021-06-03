@@ -1,0 +1,63 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Lever_Switch : MonoBehaviour {
+
+    [SerializeField]
+    private GameObject switchFenceAxis = null;
+    [SerializeField]
+    private GameObject switchLeverAxis = null;
+    [SerializeField]
+    private float rotationSpeed = 3.0f;
+
+    //fence rotating axis
+    private float yAxis = 90f;
+    //lever rotating axis
+    private float zAxis = 60f;
+
+    private bool isSwitchOn = false;
+
+    // Use this for initialization
+    void Start()
+    {
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (isSwitchOn == true)
+        {
+            if (yAxis > 0f)
+            {
+                yAxis -= rotationSpeed;
+            }
+            if (zAxis > -60)
+            {
+                zAxis -= rotationSpeed;
+            }
+        }
+        else
+        {
+            if (yAxis < 90f)
+            {
+                yAxis += rotationSpeed;
+            }
+            if (zAxis < 60)
+            {
+                zAxis += rotationSpeed;
+            }
+        }
+
+        switchLeverAxis.transform.localRotation = Quaternion.Euler(0, 0, switchLeverAxis.transform.localRotation.z+zAxis);
+        switchFenceAxis.transform.localRotation = Quaternion.Euler(0, switchFenceAxis.transform.rotation.y + yAxis, 0);
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "Player")
+        {
+            isSwitchOn = !isSwitchOn;
+        }
+    }
+}

@@ -1,0 +1,39 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Level
+{    
+    public int id;
+    public int map_height;   
+    public int map_width;
+
+    public Tile[,] tile_map;
+
+    public Level(int id_)
+    {
+        id = id_;
+        map_height = 0;
+        map_width = 0;
+    }
+
+    public void TileSetting()
+    {
+        if (map_height == 0 || map_width == 0)
+        {
+            Debug.Log("HEIGHT OR WIDTH OF MAP IS NOT SET!");
+        }
+        else
+        {
+            tile_map = new Tile[map_width, map_height];
+
+            for (int i = 0; i < map_width; i++)
+            {
+                for (int j = 0; j < map_height; j++)
+                {
+                    tile_map[i, j] = new Tile();
+                }
+            }
+        }
+    }
+}

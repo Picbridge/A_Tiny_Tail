@@ -1,0 +1,116 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class HermesShoes : MonoBehaviour {
+
+    public GameObject item;    
+
+    [HideInInspector] public float respawnTime = 0;
+
+    Coroutine hermesCoroutine;
+
+	// Use this for initialization
+	void Start ()
+    {
+        item = transform.GetChild(0).gameObject;        
+        StartCoroutine(floating());
+	}
+	
+	// Update is called once per frame
+	void Update ()
+    {
+        if (respawnTime != 0)
+        {
+            respawnTime -= Time.deltaTime;
+
+            if (respawnTime < 0)
+            {
+                respawnTime = 0;
+               // item.SetActive(true);
+
+               if (hermesCoroutine == null)
+               {                   
+                   hermesCoroutine = StartCoroutine(ItemEffect(false));
+               }
+            }
+        }
+	}
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "Player")
+        {
+            if (respawnTime == 0)
+            {
+                //item.SetActive(false);
+
+                if (hermesCoroutine == null)
+                {                    
+                    hermesCoroutine = StartCoroutine(ItemEffect(true));
+                }
+
+                other.GetComponent<Character>().speedCoolDown = 5f;
+
+                respawnTime = 10f;
+
+                
+            }
+        }
+    }
+
+    IEnumerator ItemEffect(bool vanishing)
+    {
+        int value = vanishing ? -1 : 1;        
+
+        if(vanishing == false)
+            item.SetActive(true);
+
+        Color itemColor = item.GetComponent<MeshRenderer>().material.color;
+        Color color = itemColor;
+        while (true)
+        {                                
+            color.a += Time.deltaTime * value;
+            item.GetComponent<MeshRenderer>().material.color = color;            
+
+            if (color.a >= 1)
+            {                
+                break;
+            }
+            if (color.a <= 0)
+            {
+                item.SetActive(false);
+                break;
+            }
+
+            yield return null;
+        }
+
+        hermesCoroutine = null;
+
+        
+    }
+
+    IEnumerator floating()
+    {
+        float height = item.transform.position.y;
+        float time = 2.0f;
+        float value = 0.05f;
+
+        while (true)
+        {
+            time -= Time.deltaTime;
+            height += value * Time.deltaTime;
+
+            item.transform.position = new Vector3(item.transform.position.x, height, item.transform.position.z);
+
+            if (time < 0)
+            {
+                time = 3.0f;
+                value = -value;
+            }
+
+            yield return null;
+        }
+    }
+}

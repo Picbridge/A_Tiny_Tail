@@ -1,0 +1,26 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class CheckWin_GoalLine : MonoBehaviour
+ {
+    public GameSceneManager gameSceneManager;
+
+    public int levelIndex; 
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "Player")
+        {
+            gameSceneManager.PopUpWinningPanel();
+            other.GetComponentInChildren<Animator>().SetBool("isLevelCleared", true);
+            Character[] characters = Characters.instance.transform.GetComponentsInChildren<Character>();
+            for (int i = 0; i < characters.Length; ++i)
+                characters[i].isCaptured = true; // just to block the character's moving
+
+            //
+            int rank = RankingManager.instance.GameEnd(levelIndex);
+            gameSceneManager.StarRating(rank);
+        }
+    }
+}

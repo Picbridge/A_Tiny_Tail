@@ -1,0 +1,95 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Tutorial_C_TutorialManager : MonoBehaviour {
+    [SerializeField]
+    private GameObject arrow;
+    [SerializeField]
+    private GameObject goalLine;
+    [SerializeField]
+    private GameObject catapultShooter;
+    [SerializeField]
+    private GameObject catapultButton;
+    [SerializeField]
+    private GameObject divisibleUI;
+    [SerializeField]
+    private GameObject introUI;
+    private float dt;
+    private bool isGoingToShooter;
+    private bool isGoingToButton;
+    private bool isGoingToGoal;
+    Collider checkShooterCollider;
+    Collider checkButtonCollider;
+    Character character;
+    [SerializeField]
+    private Camera cam;
+    // Use this for initialization
+    void Start()
+    {
+        dt = 0;
+        isGoingToShooter = false;
+        isGoingToButton = false;
+        isGoingToGoal = false;
+        checkShooterCollider = catapultShooter.GetComponent<Collider>();
+        checkButtonCollider = catapultButton.GetComponent<Collider>();
+        character = transform.parent.GetComponent<Character>();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        dt += Time.deltaTime;
+
+        Vector3 imgPos = cam.WorldToScreenPoint(transform.position);
+        Vector3 imgPosForIntro = cam.WorldToScreenPoint(catapultShooter.transform.position);
+        if (character.isDivisible)
+        {
+            divisibleUI.SetActive(true);
+            introUI.SetActive(true);
+            divisibleUI.transform.position = imgPos;
+            introUI.transform.position = imgPosForIntro;
+        }
+        else
+        {
+            divisibleUI.SetActive(false);
+            introUI.SetActive(false);
+        }
+
+        if (isGoingToShooter == false && isGoingToButton == false && isGoingToGoal == false)
+            arrow.transform.position = new Vector3(arrow.transform.position.x, (Mathf.Sin(dt * 4) * 0.5f + 2), arrow.transform.position.z);
+        else if (isGoingToShooter == true)
+            arrow.transform.position = new Vector3(catapultShooter.transform.position.x, (Mathf.Sin(dt * 4) * 0.5f + 2), catapultShooter.transform.position.z);
+        else if (isGoingToButton == true)
+            arrow.transform.position = new Vector3(catapultButton.transform.position.x, (Mathf.Sin(dt * 4) * 0.5f + 2), catapultButton.transform.position.z);
+        else if (isGoingToGoal == true)
+            arrow.transform.position = new Vector3(goalLine.transform.position.x, (Mathf.Sin(dt * 4) * 0.5f + 2), goalLine.transform.position.z);
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "Potion")
+        {
+            isGoingToShooter = true;
+        }
+        else if (other == checkShooterCollider && isGoingToShooter && character.isDivisible == false)
+        {
+            isGoingToShooter = false;
+            isGoingToButton = true;
+        }
+        else if (other == checkButtonCollider && isGoingToButton)
+        {
+            isGoingToButton = false;
+            isGoingToGoal = true;
+        }
+
+    }
+    private void OnTriggerExit(Collider other)
+    {
+         if (other == checkShooterCollider && isGoingToButton)
+        {
+            isGoingToButton = false;
+            isGoingToGoal = true;
+        }
+    }
+}

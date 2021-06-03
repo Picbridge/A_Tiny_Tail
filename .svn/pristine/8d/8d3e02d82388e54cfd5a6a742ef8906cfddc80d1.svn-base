@@ -1,0 +1,163 @@
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class GameSceneManager : MonoBehaviour
+{
+    //public static GameSceneManager instance;
+
+    public GameObject pausePanel;
+    public GameObject optionPanel;
+    public GameObject WinningPanel;
+    public GameObject WinAllLevelPanel;
+
+    public 
+
+	void Update ()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+            PopPausePanel();
+    }
+
+   public  void PopPausePanel()
+    {        
+        bool active = !pausePanel.activeInHierarchy;
+        bool active_win = !WinningPanel.activeInHierarchy;
+        bool active_winall = false;
+
+        if (WinAllLevelPanel != null)
+        {
+            active_winall = !WinAllLevelPanel.activeInHierarchy;
+
+            if (active_winall == false)
+                return;
+        }
+
+        if (active_win == false)
+            return;
+
+        if (active == true)
+            Time.timeScale = 0;
+        else
+            Time.timeScale = 1;
+
+        pausePanel.SetActive(active);
+        optionPanel.SetActive(false);
+    }
+
+    public void PopupOptionPanel()
+    {
+        bool active = !optionPanel.activeInHierarchy;
+
+        SoundManager.instance.PlaySound("ButtonSound");
+        optionPanel.SetActive(active);
+    }
+
+    public void PopUpWinningPanel()
+    {
+        bool active = !WinningPanel.activeInHierarchy;
+
+        if (active == false)
+        {
+            Time.timeScale = 1.0f;
+
+            if (GameSceneIndexManager.instance.currentLevelIndex <= TileMapManager.instance.levelSize - 1)
+            {
+                SoundManager.instance.PlaySound("ButtonSound");
+                ++GameSceneIndexManager.instance.currentLevelIndex;
+                SceneManager.LoadScene(++GameSceneIndexManager.instance.currentSceneIndex);
+            }
+        }
+        else
+            Time.timeScale = 0.0f;
+        
+        WinningPanel.SetActive(active);
+    }
+
+    public void PopupWinAllLevelPanel()
+    {
+        bool active = !WinAllLevelPanel.activeInHierarchy;
+
+        if (active == false)       
+            Time.timeScale = 1.0f;
+        
+        else
+            Time.timeScale = 0.0f;
+
+        SoundManager.instance.PlaySound("ButtonSound");
+        WinAllLevelPanel.SetActive(active);
+    }
+
+    public void ResumeGame()
+    {
+        SoundManager.instance.PlaySound("ButtonSound");
+        PopPausePanel();
+    }
+
+    public void RestartGame()
+    {
+        Time.timeScale = 1;
+        SoundManager.instance.PlaySound("ButtonSound");
+
+        SceneManager.LoadScene(GameSceneIndexManager.instance.currentSceneIndex);
+    }
+
+    public void GiveUpGame()
+    {
+        Time.timeScale = 1;
+        SoundManager.instance.PlaySound("ButtonSound");
+
+        GameSceneIndexManager.instance.currentSceneIndex = 0;
+        GameSceneIndexManager.instance.currentLevelIndex = 0;
+        
+        SceneManager.LoadScene("MainMenu");
+    }
+
+    public void Option()
+    {
+        SoundManager.instance.PlaySound("ButtonSound");
+        PopupOptionPanel();
+    }
+
+    public void QuitGame()
+    {
+        SoundManager.instance.PlaySound("ButtonSound");
+
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
+    }
+
+    public void GoToCreditScene()
+    {
+        Time.timeScale = 1;
+        SceneManager.LoadScene("CreditScene");
+    }
+
+    public bool IsGoalPosOccupied(Vector3 goalPos)
+    {
+        Character[] characters = GameObject.FindObjectsOfType<Character>();
+        int charNum = characters.Length;
+
+        Vector3[] RoundedCharPos = new Vector3[charNum];
+
+        for (int i = 0; i < charNum; i++)
+        {
+            RoundedCharPos[i] = new Vector3((float)Math.Round(characters[i].transform.position.x), (float)Math.Round(characters[i].transform.position.y), (float)Math.Round(characters[i].transform.position.z));
+        }
+
+        for (int i = 0; i < charNum; i++)
+        {
+            if (goalPos == RoundedCharPos[i])
+                return false;
+        }
+
+        return true;
+    }
+   
+}
+

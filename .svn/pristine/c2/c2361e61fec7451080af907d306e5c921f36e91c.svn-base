@@ -1,0 +1,52 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class CharacterSelectionManager : Singleton<CharacterSelectionManager> {
+
+    public List<GameObject> characters;
+    public int currentCharacterIndex { get; private set; }
+
+    // called first
+    void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+        currentCharacterIndex = 0;
+    }
+
+    // called second
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        /* main menu or characterSelectionMenu */
+        if (scene.buildIndex == 0 || scene.buildIndex == 13)
+            return;
+
+        GameObject currentCharObj = Instantiate(characters[currentCharacterIndex]);
+        Character currentCharacter = currentCharObj.AddComponent<Character>();
+        CopyInformation(Characters.instance.oldCharacter, currentCharacter);
+        Destroy(Characters.instance.oldCharacter.gameObject);
+        currentCharacter.transform.parent = Characters.instance.transform;
+    }
+
+    void CopyInformation(Character source, Character destination)
+    {
+        destination.transform.position = source.transform.position;
+        //destination.transform.rotation = source.transform.rotation;
+        destination.transform.localScale = source.transform.localScale;
+        destination.speed = source.speed;
+        destination.isCaptured = source.isCaptured;
+        destination.isDivisible = source.isDivisible;
+        //destination.color = GetComponentInChildren<Renderer>();
+        destination.divisibleMaterial = source.divisibleMaterial;
+        destination.normalMaterial = source.normalMaterial;
+        //destination.rb = destination.GetComponent<Rigidbody>();
+        //destination.characterCollision = destination.GetComponent<Collider>();
+    }
+
+    public void OnCharacterSelect(int index)
+    {
+        currentCharacterIndex = index;
+        SceneManager.LoadScene("MainMenu");
+    }
+}

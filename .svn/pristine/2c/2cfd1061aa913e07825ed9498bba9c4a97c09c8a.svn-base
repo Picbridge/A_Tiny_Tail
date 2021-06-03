@@ -1,0 +1,25 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Menu_FenceMove : MonoBehaviour
+{
+    float rightLimit = -9.549f;
+    float leftLimit = -1.324838f;
+	// Use this for initialization
+	void Start ()
+    {
+        //-8.56 -> gets out of sight 
+        //2.144 ->start
+    }
+	
+	// Update is called once per frame
+	void Update ()
+    {
+        transform.Translate(0.0f , 0.0f, -Time.deltaTime);
+        if(transform.position.z <= rightLimit)
+        {
+            transform.Translate(0.0f, 0.0f, leftLimit-rightLimit);
+        }
+    }
+}

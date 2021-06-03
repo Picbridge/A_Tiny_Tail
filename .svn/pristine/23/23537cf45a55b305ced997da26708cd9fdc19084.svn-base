@@ -1,0 +1,161 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Character : MonoBehaviour {
+
+    public float speed = 1.0f;
+    private bool isCaptured = false;
+    static bool isSpringOccupied = false;
+    static bool isOnButton = false;
+    public Transform destination;
+    bool isDivisible = false;
+    Renderer color;
+    public Material divisibleMaterial;
+    public Material normalMaterial;
+    bool isCharFalling = false;
+    bool isCharJumping = false;
+    Vector3 delta;
+    Vector3 jumpMiddlePoint;
+    public float MAX_JUMP_HEIGHT = 3.0f;
+    Rigidbody rb;
+    float tempForce;
+    float tempHalfDistance;
+    Collider collider;
+
+	// Use this for initialization
+	void Start () {
+        color = GetComponent<Renderer>();
+        rb = GetComponent<Rigidbody>();
+        collider = GetComponent<Collider>();
+	}
+	
+	// Update is called once per frame
+	void Update () {
+        if (Input.GetKeyDown(KeyCode.Space)
+            && isDivisible && !isCaptured)
+        {
+            color.material = normalMaterial;
+            Instantiate<GameObject>(this.gameObject);
+            isDivisible = false;
+        }
+
+        if (isOnButton && isCaptured && !isCharJumping)
+        {
+            isCharJumping = true;
+            isCharFalling = false;
+            rb.useGravity = false;
+            collider.enabled = false;
+            tempForce = 5;
+        }
+
+        if (isCharJumping)
+        {
+            Jump();
+        }
+
+        Move();
+    }
+
+    void Move()
+    {
+        if (isCaptured)
+            return;
+
+        if (Input.GetKey(KeyCode.W))
+                transform.Translate(0.0f, 0.0f, speed * Time.deltaTime);
+        if (Input.GetKey(KeyCode.A))
+            transform.Translate(-speed * Time.deltaTime, 0.0f, 0.0f);
+        if (Input.GetKey(KeyCode.S))
+            transform.Translate(0.0f, 0.0f, -speed * Time.deltaTime);
+        if (Input.GetKey(KeyCode.D))
+            transform.Translate(speed * Time.deltaTime, 0.0f, 0.0f);
+    }
+
+    void Jump()
+    {
+        //transform.localPosition = new Vector3(destination.position.x,
+        //                                        transform.localPosition.y,
+        //                                        destination.position.z);
+
+        if (!isCharFalling)
+        {
+            //Vector3 upForce = new Vector3(0, tempForce, 0);
+            //tempForce -= Time.deltaTime;
+            
+            delta = jumpMiddlePoint - transform.position;
+            if (delta.magnitude < 0.5)
+            //if (((jumpMiddlePoint.x - transform.position.x) * (jumpMiddlePoint.x - transform.position.x)
+             //   + (jumpMiddlePoint.z - transform.position.z) * (jumpMiddlePoint.z - transform.position.z)) < 0.01)
+            {
+                isCharFalling = true;
+               // Debug.Log(tempForce);
+                //tempForce = 0;
+            }
+
+            //delta += upForce;
+        }
+        
+        if (isCharFalling)
+        {
+            //Vector3 downForce = new Vector3(0, -tempForce, 0);
+            //tempForce += Time.deltaTime;
+
+            delta = destination.position - transform.position;
+
+            if (delta.magnitude < 0.5)
+            //if (((destination.position.x - transform.position.x) * (destination.position.x - transform.position.x)
+            //    + (destination.position.z - transform.position.z) * (destination.position.z - transform.position.z)) < 0.01)
+            {
+                isCharJumping = false;
+              //  Debug.Log(tempForce);
+            }
+
+            //delta += downForce;
+        }
+        delta.Normalize();
+        transform.Translate(delta * 3 * Time.deltaTime, Space.World);
+
+        if (isCharJumping == false)
+        {
+            rb.useGravity = true;
+            isCaptured = false;
+            isSpringOccupied = false;
+            collider.enabled = true;
+        }        
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "Spring" && isSpringOccupied == false && !isDivisible)
+        {
+            isCaptured = true;
+            isSpringOccupied = true;
+            transform.position = new Vector3(other.transform.position.x,
+                                                transform.position.y,
+                                                other.transform.position.z);
+            jumpMiddlePoint = (destination.position + transform.position) / 2;
+            //tempHalfDistance = jumpMiddlePoint
+            jumpMiddlePoint.y = MAX_JUMP_HEIGHT;
+            
+        }
+
+        if (other.tag == "Button")
+        {            
+            isOnButton = true;
+        }
+
+        if(other.tag == "Potion" && !isDivisible)
+        {
+            isDivisible = true;
+            color.material = divisibleMaterial;
+            Destroy(other.gameObject);
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.tag == "Button")
+            isOnButton = false;
+    }
+}

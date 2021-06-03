@@ -1,0 +1,267 @@
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+
+public class GameSceneManager : MonoBehaviour
+{
+    #region Singleton
+
+    public static GameSceneManager instance; // variable to store the actual instance for the class object
+
+    void Awake()
+    {
+        /* if object is already created */
+        if (instance != null)
+        {
+            Debug.LogWarning("More than one instance of GameSceneManager found!");
+            return;
+        }
+        instance = this;
+    }
+
+    #endregion
+
+    public int currentLevelIndex;
+
+    public GameObject timer;
+    public Text time_Min;
+    public Text time_Sec;
+
+    public GameObject pausePanel;
+    public GameObject optionPanel;    public GameObject winningPanel;
+    public GameObject CertQuitPanel;
+
+    public GameObject[] star;
+
+    AsyncOperation async;
+
+    private void Start()
+    {
+        RankingManager.instance.GameStart();
+        StarInitialize();
+    }
+
+    void Update ()
+    {
+        time_Min.text = ((int)(RankingManager.instance.timer / 60)).ToString();
+        time_Sec.text = ((int)(RankingManager.instance.timer % 60)).ToString();
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+            PopPausePanel();
+
+        UpdateCheatCode();
+    }
+
+    void UpdateCheatCode()
+    {
+        if (Input.GetKeyDown(KeyCode.Keypad0))
+        {
+            Time.timeScale = 1.0f;
+            SceneManager.LoadScene("MainMenu");
+        }
+        else if (Input.GetKeyDown(KeyCode.Keypad1))
+        {
+            Time.timeScale = 1.0f;
+            SceneManager.LoadScene("H_Tutorial");
+        }
+        else if (Input.GetKeyDown(KeyCode.Keypad2))
+        {
+            Time.timeScale = 1.0f;
+            SceneManager.LoadScene("H_Lv1");
+        }
+        else if (Input.GetKeyDown(KeyCode.Keypad3))
+        {
+            Time.timeScale = 1.0f;
+            SceneManager.LoadScene("H_Lv2");
+        }
+        else if (Input.GetKeyDown(KeyCode.Keypad4))
+        {
+            Time.timeScale = 1.0f;
+            SceneManager.LoadScene("C_Tutorial");
+        }
+        else if (Input.GetKeyDown(KeyCode.Keypad5))
+        {
+            Time.timeScale = 1.0f;
+            SceneManager.LoadScene("C_Lv1");
+        }
+        else if (Input.GetKeyDown(KeyCode.Keypad6))
+        {
+            Time.timeScale = 1.0f;
+            SceneManager.LoadScene("C_Lv2");
+        }
+        else if (Input.GetKeyDown(KeyCode.Keypad7))
+        {
+            Time.timeScale = 1.0f;
+            SceneManager.LoadScene("L_Tutorial");
+        }
+        else if (Input.GetKeyDown(KeyCode.Keypad8))
+        {
+            Time.timeScale = 1.0f;
+            SceneManager.LoadScene("L_Lv1");
+        }
+        else if (Input.GetKeyDown(KeyCode.Keypad9))
+        {
+            Time.timeScale = 1.0f;
+            SceneManager.LoadScene("L_Lv2");
+        }
+        else if (Input.GetKeyDown(KeyCode.KeypadDivide))
+        {
+            Time.timeScale = 1.0f;
+            SceneManager.LoadScene("M_Lv1");
+        }
+        else if (Input.GetKeyDown(KeyCode.KeypadMultiply))
+        {
+            Time.timeScale = 1.0f;
+            SceneManager.LoadScene("M_Lv2");
+        }
+        else if (Input.GetKeyDown(KeyCode.KeypadMinus))
+        {
+            Time.timeScale = 1.0f;
+            SceneManager.LoadScene("M_Lv3");
+        }
+    }
+
+    public void PopPausePanel()
+    {        
+        bool active = !pausePanel.activeInHierarchy;
+        bool active_win = !winningPanel.activeInHierarchy;
+
+        if (active_win == false)
+            return;
+
+        if (active == true)
+            Time.timeScale = 0;
+        else
+            Time.timeScale = 1;
+
+        pausePanel.SetActive(active);
+        optionPanel.SetActive(false);
+    }
+
+    public void PopupOptionPanel()
+    {
+        bool active = !optionPanel.activeInHierarchy;
+
+        SoundManager.instance.PlaySound("ButtonSound");
+        optionPanel.SetActive(active);
+    }
+
+    public void PopUpWinningPanel()
+    {
+        Debug.Log("s");
+        winningPanel.SetActive(true);
+        SoundManager.instance.PlaySound("ButtonSound");
+    }
+
+    public void OnConfirmWin()
+    {
+        SceneManager.LoadScene("LevelSelectionMenu");
+    }
+
+    public void GoToNextLevel()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+    }
+
+    public void ResumeGame()
+    {
+        SoundManager.instance.PlaySound("ButtonSound");
+        PopPausePanel();
+    }
+
+    public void RestartGame()
+    {
+        Time.timeScale = 1;
+        SoundManager.instance.PlaySound("ButtonSound");
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    public void GiveUpGame()
+    {
+        Time.timeScale = 1;
+        SoundManager.instance.PlaySound("ButtonSound");
+        SceneManager.LoadScene("MainMenu");
+    }
+
+    public void Option()
+    {
+        SoundManager.instance.PlaySound("ButtonSound");
+        PopupOptionPanel();
+    }
+
+    public void QuitGame()
+    {
+        SoundManager.instance.PlaySound("ButtonSound");
+
+        CertQuitPanel.SetActive(true);
+    }
+
+    public void CertQuit_Yes()
+    {
+        SoundManager.instance.PlaySound("ButtonSound");
+
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
+    }
+
+    public void CertQuit_No()
+    {
+        SoundManager.instance.PlaySound("ButtonSound");
+
+        CertQuitPanel.SetActive(false);
+    }
+
+    public void GoToCreditScene()
+    {
+        Time.timeScale = 1;
+        SceneManager.LoadScene("CreditScene");
+    }
+
+    public bool IsGoalPosOccupied(Vector3 goalPos)
+    {
+        Character[] characters = GameObject.FindObjectsOfType<Character>();
+        int charNum = characters.Length;
+
+        Vector3[] RoundedCharPos = new Vector3[charNum];
+
+        for (int i = 0; i < charNum; i++)
+        {
+            RoundedCharPos[i] = new Vector3((float)Math.Round(characters[i].transform.position.x), (float)Math.Round(characters[i].transform.position.y), (float)Math.Round(characters[i].transform.position.z));
+        }
+
+        for (int i = 0; i < charNum; i++)
+        {
+            if (goalPos == RoundedCharPos[i])
+                return false;
+        }
+
+        return true;
+    }
+
+    public void TimerOnOff()
+    {
+        bool active = timer.activeInHierarchy;
+
+        timer.SetActive(!active);
+    }
+
+    public void StarRating(int num)
+    {
+        for (int i = 0; i < num; i++)
+            star[i].SetActive(true);
+    }
+
+    public void StarInitialize()
+    {
+        for (int i = 0; i < 3; i++)
+            star[i].SetActive(false);
+    }
+
+}
+

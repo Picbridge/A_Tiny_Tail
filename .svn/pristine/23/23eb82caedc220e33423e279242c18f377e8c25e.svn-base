@@ -1,0 +1,95 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Tutorial_H_TutorialManager : MonoBehaviour {
+
+    [SerializeField]
+    private Camera cam;
+    [SerializeField]
+    private GameObject directionUI;
+    [SerializeField]
+    private GameObject divisibleUI;
+    [SerializeField]
+    private GameObject holeCollider;
+    [SerializeField]
+    private GameObject arrow;
+    [SerializeField]
+    private GameObject goalLine;
+    private bool isArrowOn;
+    Collider checkHoleCollider;
+    private bool isDivisible;
+    private bool isholeColliderOff;
+
+    private float dt;
+    // Use this for initialization
+    void Start ()
+    {
+        isDivisible = false;
+        isArrowOn = false;
+        isholeColliderOff = false;
+        checkHoleCollider = holeCollider.GetComponent<Collider>();
+        dt = 0;
+    }
+	
+	// Update is called once per frame
+	void Update ()
+    {
+        Vector3 imgPos = cam.WorldToScreenPoint(transform.position);
+        if (isDivisible)
+        {
+            directionUI.SetActive(false);
+            divisibleUI.SetActive(true);
+            divisibleUI.transform.position = imgPos;
+        }
+        else
+        {
+            directionUI.SetActive(true);
+            divisibleUI.SetActive(false);
+            directionUI.transform.position = imgPos;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space) && isDivisible)
+        {
+            isDivisible = false;
+            holeCollider.SetActive(false);
+            isholeColliderOff = true;
+            dt = 0;
+        }
+        
+
+        if(isArrowOn == true)
+        {
+            dt += Time.deltaTime;
+            arrow.transform.position = new Vector3(arrow.transform.position.x, (Mathf.Sin(dt*4)*0.5f + 2), arrow.transform.position.z);
+            if (dt>4.0f)
+            {
+                arrow.SetActive(false);
+                isArrowOn = false;
+                dt = 0;
+            }
+        }
+
+        if (isholeColliderOff == true)
+        {
+            dt += Time.deltaTime;
+            arrow.SetActive(true);
+            arrow.transform.position = new Vector3(goalLine.transform.position.x, (Mathf.Sin(dt * 4) * 0.5f + 2), goalLine.transform.position.z);
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "Potion" && !isDivisible)
+        {
+            isDivisible = true;
+        }
+        else if(other == checkHoleCollider)
+        {
+            arrow.SetActive(true);
+            isArrowOn = true;
+        }
+    }
+
+
+}

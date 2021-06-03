@@ -1,0 +1,107 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class GameSceneManager : MonoBehaviour
+{
+    //public static GameSceneManager instance;
+
+    public GameObject pausePanel;
+    public GameObject optionPanel;
+    public GameObject WinningPanel;
+    public GameObject WinAllLevelPanel;
+
+	void Update ()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+            PopPausePanel();
+    }
+
+   public  void PopPausePanel()
+    {        
+        bool active = !pausePanel.activeInHierarchy;
+
+        if (active == true)
+            Time.timeScale = 0;
+        else
+            Time.timeScale = 1;
+
+        pausePanel.SetActive(active);
+        optionPanel.SetActive(false);
+    }
+
+    public void PopupOptionPanel()
+    {
+        bool active = !optionPanel.activeInHierarchy;
+
+        optionPanel.SetActive(active);
+    }
+
+    public void PopUpWinningPanel()
+    {
+        bool active = !WinningPanel.activeInHierarchy;
+
+        if (active == false)
+        {
+            Time.timeScale = 1.0f;
+
+            if (GameSceneIndexManager.instance.currentLevelIndex < 6)
+            {
+                ++GameSceneIndexManager.instance.currentLevelIndex;
+                SceneManager.LoadScene(++GameSceneIndexManager.instance.currentSceneIndex);
+            }
+        }
+        else
+            Time.timeScale = 0.0f;
+        
+        WinningPanel.SetActive(active);
+    }
+
+    public void PopupWinAllLevelPanel()
+    {
+        bool active = !WinAllLevelPanel.activeInHierarchy;
+
+        if (active == false)       
+            Time.timeScale = 1.0f;
+        
+        else
+            Time.timeScale = 0.0f;
+
+        WinAllLevelPanel.SetActive(active);
+    }
+
+    public void ResumeGame()
+    {
+        PopPausePanel();
+    }
+
+    public void RestartGame()
+    {
+        Time.timeScale = 1;
+
+        SceneManager.LoadScene(GameSceneIndexManager.instance.currentSceneIndex);
+    }
+
+    public void GiveUpGame()
+    {
+        Time.timeScale = 1;
+
+        SceneManager.LoadScene("MainMenu");
+    }
+
+    public void Option()
+    {
+        PopupOptionPanel();
+    }
+
+    public void QuitGame()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
+    }    
+   
+}
