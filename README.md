@@ -6,7 +6,7 @@
 
 Take advantage of your brain in A Tiny Tale. By cloning, sacrificing, and blowing up cute characters, reveal a way to finally reach the finish line and achieve the characters.
 
-The game is consisted of 12 levels in 4 different theme.
+The game consists of 12 levels in 4 different theme.
 
 Each three themes has its original features, and the last theme contains all the features.
 
